@@ -1,0 +1,17 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+src/DevBlog.Api/devblog.db
+src/DevBlog.Api/devblog.db-shm
+src/DevBlog.Api/devblog.db-wal
+
+# Angular
+devblog-ui/node_modules/
+devblog-ui/dist/
+
+# Misc
+.DS_Store
+Thumbs.db
