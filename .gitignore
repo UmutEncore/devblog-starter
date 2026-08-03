@@ -4,13 +4,13 @@ obj/
 *.user
 *.suo
 .vs/
-src/DevBlog.Api/devblog.db
-src/DevBlog.Api/devblog.db-shm
-src/DevBlog.Api/devblog.db-wal
+backend/src/DevBlog.Api/devblog.db
+backend/src/DevBlog.Api/devblog.db-shm
+backend/src/DevBlog.Api/devblog.db-wal
 
 # Angular
-devblog-ui/node_modules/
-devblog-ui/dist/
+frontend/devblog-ui/node_modules/
+frontend/devblog-ui/dist/
 
 # Misc
 .DS_Store
