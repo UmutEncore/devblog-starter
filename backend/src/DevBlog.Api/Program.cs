@@ -1,6 +1,8 @@
 using System.Text;
 using DevBlog.Api.Data;
 using DevBlog.Api.Endpoints;
+using DevBlog.Api.Repositories;
+using DevBlog.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 1b. Repositories & Services
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // 2. CORS — TODO: restrict in production
 builder.Services.AddCors(options =>

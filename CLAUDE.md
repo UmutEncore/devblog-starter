@@ -49,17 +49,22 @@ No test setup (no `*.spec.ts` files, no test script) is currently configured.
 Minimal-API style, wired up entirely in `Program.cs`:
 
 - Endpoints are grouped into static classes under `Endpoints/` (`PostsEndpoint`, `CommentsEndpoint`, `AuthEndpoint`), each exposing a static `Map(WebApplication app)` that registers its routes. New endpoint groups should follow this same pattern and be called from `Program.cs`.
-- `Data/AppDbContext.cs` defines the EF Core model (`Users`, `Posts`, `Comments`) and relationships (`Post.Author` → `User`, `Post.Comments` → `Comment`, unique-ish index on `Post.Slug`).
+- `Data/AppDbContext.cs` defines the EF Core model (`Users`, `Posts`, `Comments`) and relationships (`Post.Author` → `User`, `Post.Comments` → `Comment`, unique index on `Post.Slug` enforced at the DB level, case-sensitive).
 - `Data/DataSeeder.cs` seeds an admin user and sample posts/comments on first run.
 - Auth is JWT bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`); only `POST /posts` currently requires authorization (`.RequireAuthorization()`). Claims carry `NameIdentifier` (user id), `Name`, and `Role`.
 - OpenAPI is exposed via `AddOpenApi()`/`MapOpenApi()` in Development only, with Scalar.AspNetCore referenced for API docs UI.
 
-Known rough edges already flagged with `TODO` comments in the code — be aware of these when touching related areas rather than treating them as new findings:
-- Password hashing is a placeholder (`Convert.ToBase64String` of UTF8 bytes, in both `AuthEndpoint` and `DataSeeder`) — not real hashing.
-- JWT signing secret is hardcoded in `Program.cs` and `AuthEndpoint.cs` (must stay in sync if changed) rather than read from config.
-- CORS allows any origin/method/header.
-- `GET /posts` has no pagination.
-- `POST /posts` doesn't validate slug uniqueness.
+### Architecture decisions (backend layering)
+
+This is a binding convention for backend code going forward, not a description of the current state (see [Technical debt](#technical-debt)):
+
+- Endpoints must **not** inject `AppDbContext` directly. Endpoints depend on a service.
+- Services contain the business logic and depend on repositories, **not** on `AppDbContext` directly.
+- Repositories are the only layer that talks to `AppDbContext`. Follow the **Interface Segregation Principle**: each entity gets its own repository interface (e.g. `IPostRepository`) rather than services consuming a shared generic interface directly. Entity-specific interfaces extend a common generic base (`IRepository<T>` / `Repository<T>`) to reuse shared CRUD plumbing, and add only the query methods that entity's services actually need (e.g. `IPostRepository.ExistsBySlugAsync`) — keep the generic base itself minimal/shared, and keep each entity interface narrow to its own consumers.
+
+Target dependency direction: `Endpoint → Service → Repository → AppDbContext`.
+
+`PostsEndpoint` is the first endpoint migrated onto this layering (`Services/IPostService.cs`/`PostService.cs` → `Repositories/IPostRepository.cs`/`PostRepository.cs`, with `Repositories/IRepository.cs`/`Repository.cs` as the shared generic base) — use it as the reference pattern when migrating `CommentsEndpoint`/`AuthEndpoint`.
 
 ### Frontend
 
@@ -73,29 +78,16 @@ Angular 22 standalone-components app (no NgModules):
 
 ### Contract between frontend and backend
 
-The frontend's `PostSummary`/`PostDetail`/`Comment` TypeScript interfaces in `post.service.ts` must stay in sync with the anonymous projections returned by `PostsEndpoint` (`GET /posts`, `GET /posts/{slug}`) — there's no shared schema/codegen between the two projects, so changes to one side's response/request shape need a manual matching update on the other side.
+The frontend's `PostSummary`/`PostDetail`/`Comment` TypeScript interfaces in `post.service.ts` must stay in sync with the `PostSummaryDto`/`PostDetailDto`/`CommentDto` records returned by `PostService` (via `PostsEndpoint`'s `GET /posts`, `GET /posts/{slug}`) — there's no shared schema/codegen between the two projects, so changes to one side's response/request shape need a manual matching update on the other side.
 
-## Architecture decisions (backend layering)
+## Technical debt
 
-This is a binding convention for backend code going forward, not a description of the current state:
-
-- Endpoints must **not** inject `AppDbContext` directly. Endpoints depend on a service.
-- Services contain the business logic and depend on repositories, **not** on `AppDbContext` directly.
-- Repositories are the only layer that talks to `AppDbContext`. Default to a **generic repository** implementation (e.g. `IRepository<T>` / `Repository<T>`) rather than a bespoke interface per entity; only reach for a dedicated, entity-specific repository when an entity's query needs don't fit the generic shape.
-
-Target dependency direction: `Endpoint → Service → Repository → AppDbContext`.
-
-### Technical debt: endpoints not yet on this architecture
-
-None of the current endpoints follow the layering above — all of them inject `AppDbContext` directly and query it inline, with no service or repository layer in between:
-
-- `Endpoints/PostsEndpoint.cs` — `GET /posts`, `GET /posts/{slug}`, `POST /posts`
-- `Endpoints/CommentsEndpoint.cs` — `POST /posts/{slug}/comments`
-- `Endpoints/AuthEndpoint.cs` — `POST /auth/login`
-
-Treat these as technical debt, not as the pattern to copy. When adding a new endpoint, build it on a service + (generic) repository from the start. When materially touching one of the endpoints above, migrate the touched flow onto the service/repository layering rather than adding more direct `AppDbContext` usage to it.
-
-**Testing** — there is no test project and no test strategy today (see [Common commands](#common-commands)). The expectation going forward is an xUnit test project for the backend with **70% coverage**. This is not in place yet; don't assume backend changes are covered by tests, and flag new backend work that lacks xUnit tests as debt rather than as done.
+- **Password hashing is a placeholder.** `AuthEndpoint` and `DataSeeder` hash passwords with `Convert.ToBase64String` of UTF8 bytes — not real hashing.
+- **JWT signing secret is hardcoded.** Duplicated as a literal in `Program.cs` and `AuthEndpoint.cs` (must stay in sync if changed) instead of being read from config.
+- **CORS allows any origin/method/header.**
+- **`GET /posts` has no pagination.**
+- **Not all endpoints follow the target service/repository layering** described under [Architecture decisions (backend layering)](#architecture-decisions-backend-layering). `Endpoints/PostsEndpoint.cs` now follows it (`IPostService`/`PostService` → `IPostRepository`/`PostRepository`). `Endpoints/CommentsEndpoint.cs` (`POST /posts/{slug}/comments`) and `Endpoints/AuthEndpoint.cs` (`POST /auth/login`) still inject `AppDbContext` directly and query it inline. Treat these two as debt, not as the pattern to copy: migrate a touched endpoint onto the layering — following `PostsEndpoint`'s pattern — rather than adding more direct `AppDbContext` usage to it.
+- **No test strategy.** There is no test project today (see [Common commands](#common-commands)). The expectation going forward is an xUnit test project for the backend with **70% coverage**. Don't assume backend changes are covered by tests, and flag new backend work that lacks xUnit tests as debt rather than as done.
 
 ## Code style
 
