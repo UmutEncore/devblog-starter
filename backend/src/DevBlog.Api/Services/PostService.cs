@@ -10,7 +10,7 @@ public class PostService(IPostRepository posts) : IPostService
         await posts.Query()
             .Include(p => p.Author)
             .OrderByDescending(p => p.PublishedAt)
-            .Select(p => new PostSummaryDto(p.Id, p.Title, p.Slug, p.Tags, p.PublishedAt, p.Author.Username))
+            .Select(p => new PostSummaryDto(p.Id, p.Title, p.Slug, p.Tags, p.PublishedAt, p.Author.Username, p.Comments.Count()))
             .ToListAsync();
 
     public async Task<PostDetailDto?> GetBySlugAsync(string slug) =>
@@ -21,7 +21,8 @@ public class PostService(IPostRepository posts) : IPostService
             .Select(p => new PostDetailDto(
                 p.Id, p.Title, p.Content, p.Slug, p.Tags, p.PublishedAt, p.Author.Username,
                 p.Comments.OrderBy(c => c.CreatedAt)
-                    .Select(c => new CommentDto(c.Id, c.AuthorName, c.Body, c.CreatedAt))))
+                    .Select(c => new CommentDto(c.Id, c.AuthorName, c.Body, c.CreatedAt)),
+                p.Comments.Count()))
             .FirstOrDefaultAsync();
 
     public async Task<CreatePostResult> CreateAsync(CreatePostRequest req, int authorId)

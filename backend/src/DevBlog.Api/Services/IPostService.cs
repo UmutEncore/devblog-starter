@@ -7,9 +7,9 @@ public interface IPostService
     Task<CreatePostResult> CreateAsync(CreatePostRequest req, int authorId);
 }
 
-public record PostSummaryDto(int Id, string Title, string Slug, string Tags, DateTime PublishedAt, string Author);
+public record PostSummaryDto(int Id, string Title, string Slug, string Tags, DateTime PublishedAt, string Author, int CommentCount);
 public record CommentDto(int Id, string AuthorName, string Body, DateTime CreatedAt);
 public record PostDetailDto(int Id, string Title, string Content, string Slug, string Tags,
-    DateTime PublishedAt, string Author, IEnumerable<CommentDto> Comments);
+    DateTime PublishedAt, string Author, IEnumerable<CommentDto> Comments, int CommentCount);
 public record CreatePostRequest(string Title, string Content, string Slug, string Tags);
 public record CreatePostResult(DevBlog.Api.Models.Post? Post, bool SlugConflict);

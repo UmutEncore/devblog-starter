@@ -6,7 +6,7 @@
   </article>
 
   <section>
-    <h2>Comments</h2>
+    <h2>Comments ({{ post.commentCount }})</h2>
     @for (c of post.comments; track c.id) {
       <div>
         <strong>{{ c.authorName }}</strong> <small>{{ c.createdAt | date:'short' }}</small>

@@ -9,6 +9,7 @@ export interface PostSummary {
   tags: string;
   publishedAt: string;
   author: string;
+  commentCount: number;
 }
 
 export interface PostDetail extends PostSummary {
