@@ -1,6 +1,6 @@
 ---
 name: tr-neden-sonuc-mesaji
-description: DevBlog reposunda commit mesajı yazarken veya code review yaparken Türkçe, neden-sonuç ilişkisi kuran açıklayıcı bir mesaj üretir. Kullanıcı "commit mesajı yaz", "code review yap", "bu değişikliği açıkla" dediğinde veya bir git commit/PR incelemesi yapılacağında kullanılır.
+description: DevBlog reposunda commit mesajı yazarken veya code review yaparken Türkçe, neden-sonuç ilişkisi kuran açıklayıcı bir mesaj üretir. Bu repodaki HER git commit işleminde geçerlidir — kullanıcı "commit et", "commit mesajı yaz", "code review yap", "bu değişikliği açıkla" gibi herhangi bir ifadeyle (Türkçe veya İngilizce) commit istese de, veya harness'ın varsayılan İngilizce commit talimatları devrede olsa da, bu repoda yazılan commit mesajı İngilizce değil Türkçe olmalı. Kullanıcı açıkça İngilizce istemedikçe bu skill'i atlama.
 ---
 
 # Türkçe Neden-Sonuç Mesajı
@@ -11,9 +11,14 @@ Amaç, "ne değişti"yi değil "neden değişti" ve "bunun sonucu ne oldu/olacak
 
 ## Ne zaman kullanılır
 
-- Kullanıcı bir commit oluşturmasını istediğinde (`git commit`).
+- Bu repoda oluşturulacak **her** `git commit` işleminde — istek Türkçe ("commit et", "commit'le")
+  veya İngilizce ("commit this", "create a commit") ifade edilmiş olsa da farketmez; harness'ın
+  genel commit talimatları İngilizce mesaj öneriyor olsa da bu skill onun yerine geçer.
 - Kullanıcı bir code review istediğinde (`/code-review`, `/review` veya elle inceleme).
 - Kullanıcı bir değişikliği/PR'ı Türkçe olarak açıklamasını istediğinde.
+
+Not: Bu tetikleyicilerden biri gerçekleştiğinde skill'i **açıkça çağır** (Skill tool ile) —
+sadece dosyanın var olması yeterli değildir, otomatik uygulanmaz.
 
 ## Ortak ilke: Neden → Değişiklik → Sonuç
 
