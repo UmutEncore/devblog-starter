@@ -1,29 +1,37 @@
 @if (post) {
-  <article>
-    <h1>{{ post.title }}</h1>
-    <p><strong>{{ post.author }}</strong> | {{ post.publishedAt | date:'mediumDate' }} | {{ post.tags }}</p>
-    <div>{{ post.content }}</div>
+  <article class="card mb-4">
+    <div class="card-body">
+      <h1 class="card-title">{{ post.title }}</h1>
+      <p class="card-subtitle text-muted mb-3">
+        <strong>{{ post.author }}</strong> | {{ post.publishedAt | date:'mediumDate' }} | {{ post.tags }}
+      </p>
+      <div class="card-text">{{ post.content }}</div>
+    </div>
   </article>
 
   <section>
-    <h2>Comments ({{ post.commentCount }})</h2>
+    <h2 class="h4 mb-3">Comments ({{ post.commentCount }})</h2>
     @for (c of post.comments; track c.id) {
-      <div>
-        <strong>{{ c.authorName }}</strong> <small>{{ c.createdAt | date:'short' }}</small>
-        <p>{{ c.body }}</p>
+      <div class="border-bottom py-2">
+        <strong>{{ c.authorName }}</strong> <small class="text-muted">{{ c.createdAt | date:'short' }}</small>
+        <p class="mb-0">{{ c.body }}</p>
       </div>
     }
 
-    <h3>Add a comment</h3>
+    <h3 class="h5 mt-4 mb-3">Add a comment</h3>
     @if (submitted) {
-      <p>Comment submitted!</p>
+      <div class="alert alert-success">Comment submitted!</div>
     }
     <form (ngSubmit)="submitComment()">
-      <input [(ngModel)]="commentAuthor" name="author" placeholder="Your name" required>
-      <textarea [(ngModel)]="commentBody" name="body" placeholder="Your comment" required></textarea>
-      <button type="submit">Submit</button>
+      <div class="mb-3">
+        <input class="form-control" [(ngModel)]="commentAuthor" name="author" placeholder="Your name" required>
+      </div>
+      <div class="mb-3">
+        <textarea class="form-control" [(ngModel)]="commentBody" name="body" placeholder="Your comment" required></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Submit</button>
     </form>
   </section>
 } @else {
-  <p>Loading...</p>
+  <p class="text-muted">Loading...</p>
 }

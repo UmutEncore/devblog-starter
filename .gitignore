@@ -11,6 +11,7 @@ backend/src/DevBlog.Api/devblog.db-wal
 # Angular
 frontend/devblog-ui/node_modules/
 frontend/devblog-ui/dist/
+frontend/devblog-ui/.angular/
 
 # Misc
 .DS_Store

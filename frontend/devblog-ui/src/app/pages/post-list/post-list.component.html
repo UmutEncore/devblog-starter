@@ -1,13 +1,14 @@
-<h1>Posts</h1>
-<ul>
+<h1 class="mb-4">Posts</h1>
+<div class="list-group">
   @for (post of posts; track post.id) {
-    <li>
-      <a [routerLink]="['/posts', post.slug]">{{ post.title }}</a>
-      <small> — {{ post.author }} | {{ post.publishedAt | date:'mediumDate' }}</small>
-      <br>
-      <em>{{ post.tags }}</em>
-      <br>
-      <small>{{ post.commentCount }} comments</small>
-    </li>
+    <a class="list-group-item list-group-item-action" [routerLink]="['/posts', post.slug]">
+      <div class="d-flex justify-content-between align-items-start">
+        <h5 class="mb-1">{{ post.title }}</h5>
+        <small class="text-muted">{{ post.publishedAt | date:'mediumDate' }}</small>
+      </div>
+      <p class="mb-1 text-muted">{{ post.author }}</p>
+      <span class="badge text-bg-secondary">{{ post.tags }}</span>
+      <small class="text-muted d-block mt-1">{{ post.commentCount }} comments</small>
+    </a>
   }
-</ul>
+</div>

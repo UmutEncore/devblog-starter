@@ -6,11 +6,16 @@ import { RouterOutlet, RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, RouterLink],
   template: `
-    <nav>
-      <a routerLink="/posts">Posts</a> |
-      <a routerLink="/login">Login</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" routerLink="/posts">DevBlog</a>
+        <div class="navbar-nav">
+          <a class="nav-link" routerLink="/posts">Posts</a>
+          <a class="nav-link" routerLink="/login">Login</a>
+        </div>
+      </div>
     </nav>
-    <main>
+    <main class="container py-4">
       <router-outlet />
     </main>
   `
